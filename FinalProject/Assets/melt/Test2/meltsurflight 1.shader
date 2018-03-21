@@ -1,11 +1,12 @@
 ﻿// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 
-Shader "Custom/meltsurflight" {
+Shader "Custom/meltsurflight 2" {
 	Properties {
 		_Color ("Color", Color) = (1,1,1,1)
 		_Color2 ("Melt Color", Color) = (0, 0, 0, 0)
 		_MainTex ("Main Texture (RGB)", 2D) = "white" {}
 		_NoiseTex ("Noise Texture (RGB)", 2D) = "white" {}
+		_NoiseTex2 ("Noise Texture 2 (RGB)", 2D) = "white" {}
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
 		_Amount ("Melt Amount", Range(-1.0,1.0)) = 0.0
@@ -14,7 +15,7 @@ Shader "Custom/meltsurflight" {
 		//_SurfPoint("Surf Point", Vector) = (0.0, 0.0, 0.0, 0.0)
 		//_SurfPoint("Surface Point", Float) = 0.5
 		_MeltForm("Melt Form", Float) = 1
-		_MeltDist("Melt Distance", Float) = 1.0
+		//_MeltDist("Melt Distance", Float) = 1.0
 		_MeltSize("Melt Size", Float) = 2.0
 		_Tess ("Tesselation", Range(1, 50)) = 4
 
@@ -45,6 +46,7 @@ Shader "Custom/meltsurflight" {
 
 		sampler2D _MainTex;
 		sampler2D _NoiseTex;
+		sampler2D _NoiseTex2;
 		half _Glossiness;
 		half _Metallic;
 		fixed4 _Color;
@@ -78,16 +80,17 @@ Shader "Custom/meltsurflight" {
 		}
 
 		//create new position of vertex
-		float4 newPos( float4 objectSpacePosition, float3 objectSpaceNormal, float cVal ) {
+		float4 newPos( float4 objectSpacePosition, float3 objectSpaceNormal, float cVal, float abVal ) {
 
 			float4 objCenter = unity_ObjectToWorld[3];
 			float4 worldSpacePosition = mul( unity_ObjectToWorld, objectSpacePosition );
 			float4 worldSpaceNormal   = mul( unity_ObjectToWorld, float4(objectSpaceNormal,0) );
 
 			if (_Temp > _MeltPoint) {
+
+				float rate = _Temp/_MeltPoint;
+				worldSpacePosition.xyz += float3(0, -1, 0) * rate * abVal * (_Time * 0.1);
 				
-
-
 				//for when it starts melting around
 				float melt = ( worldSpacePosition.y - _SurfPoint ) / _MeltForm;
 
@@ -98,37 +101,36 @@ Shader "Custom/meltsurflight" {
 				//float mel = melt;
 				//0 is not melted, 1 is fully melted
 				melt = 1 - saturate( melt );
-
-
+				//float meltdist = 2.86 * _MeltDist;
+				float mela = melt;
 				//smoother step
 				//t = t*t*t * (t * (6f*t - 15f) + 10f)
 				melt = (melt*melt*melt * (melt * (6.0 * melt - 15.0) + 10.0)) ;
 				//melt = melt + meY;
 				//melt = pow( melt, 2.0 );
 
-				float magnitude = pow(cVal, 2.0);
 
 				//worldSpacePosition.y += float3(0, -1, 0) * magnitude;
 				//later on, use _MeltVar to increase radial
-				worldSpacePosition.z += worldSpaceNormal.z  * melt  *_MeltVar/3.0 *cVal;
-				worldSpacePosition.x += worldSpaceNormal.x  * melt  * _MeltVar/3.0;
+				//worldSpacePosition.z += worldSpaceNormal.z  * melt  *_MeltVar/3.0 *cVal;
+				//worldSpacePosition.x += worldSpaceNormal.x  * melt  * _MeltVar/3.0;
 
-				float rate = _Temp/_MeltPoint;
-				//worldSpacePosition.y += float3(0, -1, 0) * rate * cVal;
+				worldSpacePosition.z += worldSpaceNormal.z  * melt  *cVal * _MeltVar;
+				worldSpacePosition.x += worldSpaceNormal.x  * melt * _MeltVar;
 			
 
-				if (worldSpacePosition.y <= _SurfPoint) {
-					
-					worldSpacePosition.y = _SurfPoint - (mel * _MeltSize);
+				if (worldSpacePosition.y <= _SurfPoint +0.01) {
+					//worldSpacePosition.y = _SurfPoint +0.01;
+					worldSpacePosition.y = _SurfPoint +0.01;
 				} else  {
-					//worldSpacePosition.y += float3 (0, -1, 0) *rate * (_Time * 0.1);
+					//worldSpacePosition.xyz += float3 (0, -1, 0) *rate * (_Time * 0.1);
 				}
 
 				return mul( unity_WorldToObject, worldSpacePosition );
+
 			} else {
 				return mul( unity_WorldToObject, worldSpacePosition );
 			}
-
 
 		}
 
@@ -140,18 +142,21 @@ Shader "Custom/meltsurflight" {
 			UNITY_SETUP_INSTANCE_ID( v);
 			//UNITY_INITIALIZE_OUTPUT(Input, o);
 
-          	float cVal = tex2Dlod (_NoiseTex, float4(v.texcoord.xy, 0, 0)).r;
-          	cVal = pow(cVal, 2.0);
+          	float acVal = tex2Dlod (_NoiseTex, float4(v.texcoord.xy, 0, 0)).r;
+          	float cVal = pow(acVal, 2.0);
+
+          	float abVal = tex2Dlod (_NoiseTex2, float4(v.texcoord.xy, 0, 0)).r;
+
           	//float cVal = tex2Dlod (_NoiseTex, v.texcoord).r;
           	//float3 cVal = sampler2D(_NoiseTex, v.texcoord); //
           	//calculates new vertex position and normal
-          	float4 vertPosition = newPos( v.vertex, v.normal, cVal);
+          	float4 vertPosition = newPos( v.vertex, v.normal, cVal, abVal);
 
 			float4 bitangent = float4( cross( v.normal, v.tangent ), 0 );
 			float vertOffset = 0.01;
 
-			float4 v1 = newPos( v.vertex + v.tangent * vertOffset, v.normal, cVal );
-			float4 v2 = newPos( v.vertex + bitangent * vertOffset, v.normal, cVal );
+			float4 v1 = newPos( v.vertex + v.tangent * vertOffset, v.normal, cVal, abVal );
+			float4 v2 = newPos( v.vertex + bitangent * vertOffset, v.normal, cVal, abVal );
 
 			float4 newTangent = v1 - vertPosition;
 			float4 newBitangent = v2 - vertPosition;
@@ -160,8 +165,10 @@ Shader "Custom/meltsurflight" {
 			v.normal = cross( newTangent, newBitangent );
 
 			v.vertex = vertPosition;
-			//v.vertex.y -= cVal * (_Temp/_MeltPoint);
-
+			//objectSpacePosition.xyz += float3 (0, -1, 0) *rate * cVal * (_Time * 0.05);
+//			if (v.vertex.y > _SurfPoint) {
+//				v.vertex.y -= (_Temp/_MeltPoint) * acVal;
+//			}
 			//o.uv_MainTex = v.texcoord;
 
 
