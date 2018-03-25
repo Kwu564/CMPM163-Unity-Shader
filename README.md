@@ -1,6 +1,6 @@
 CMPM163 Final Project README
 
-Highlight Video, Slides, and documentation is in the repo.  You can play the webgl shader by going here:
+Highlight Video, Slides, and Documentation is in the repo.  You can play the webgl shader by going here:
 
 https://kwu564.github.io/CMPM163/Final/index.html
 
