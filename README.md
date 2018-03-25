@@ -29,3 +29,7 @@ Shuo-En Li(sli112@ucsc.edu):
   -Codepath: Lab > Assets > jelly > shaders
   
     -Responsible for the two floating jelly creatures in the scene (Transparent shader + translucent shader + vertex displacement) 
+
+Joey T Sandmeyer
+
+  -Codepath: Lab > Assets > crt
