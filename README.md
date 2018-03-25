@@ -34,4 +34,4 @@ Joey T Sandmeyer
 
   -Codepath: Lab > Assets > crt
  
-    -Created CRT shader effect and rendter texture
+    -Created CRT shader effect and render texture
