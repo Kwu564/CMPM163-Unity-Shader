@@ -19,4 +19,6 @@ Kevin Teng Wu (ketwu@ucsc.edu):
 
 Shuo-En Li(sli112@ucsc.edu):
 
-  -Responsible for the two floating jelly creatures in the scene (Transparent shader + translucent shader + vertex displacement) 
+  -Codepath: Lab > Assets > jelly
+  
+    -Responsible for the two floating jelly creatures in the scene (Transparent shader + translucent shader + vertex displacement) 
