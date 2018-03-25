@@ -33,3 +33,4 @@ Shuo-En Li(sli112@ucsc.edu):
 Joey T Sandmeyer
 
   -Codepath: Lab > Assets > crt
+    -Created CRT shader effect and rendter texture
