@@ -27,10 +27,10 @@ Shader "Custom/meltsurflight" {
 		// Physically based Standard lighting model, and enable shadows on all light types
 		//#pragma multi_compile_shadowcaster
 		//#pragma multi_compile UNITY_PASS_SHADOWCASTER
-		#pragma surface surf Standard fullforwardshadows vertex:vert addshadow nolightmap tessellate:tessFixed
+		#pragma surface surf Standard fullforwardshadows vertex:vert addshadow nolightmap //tessellate:tessFixed
 
 		// Use shader model 3.0 target, to get nicer looking lighting
-		#pragma target 4.6
+		//#pragma target 4.6
 
 		//use tesselation code
 		#include "Tessellation.cginc"
