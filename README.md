@@ -1,5 +1,10 @@
 CMPM163 Final Project README
 
+Highlight Video is in the repo.  You can play the webgl shader by going here:
+
+https://kwu564.github.io/CMPM163/Final/index.html
+
+-------------------------------------------------------------
 
 Kevin Wu (kwu28@ucsc.edu):
 
